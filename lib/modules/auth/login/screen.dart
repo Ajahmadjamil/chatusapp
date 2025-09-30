@@ -1,5 +1,8 @@
-import 'package:chatus/modules/auth/provider.dart';
+import 'package:chatus/modules/auth/login/provider.dart';
+import 'package:chatus/modules/auth/signup/screen.dart';
+import 'package:chatus/modules/auth/otp_verification/screen.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -10,7 +13,7 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Provider.of<AuthController>(context);
+    final controller = Provider.of<LoginController>(context);
     return Scaffold(
       appBar: AppBar(title: const Text("Login")),
       body: Padding(
@@ -32,16 +35,29 @@ class LoginScreen extends StatelessWidget {
             ElevatedButton(
               onPressed: controller.loading
                   ? null
-                  : () {
+                  : () async {
                       final email = emailController.text.trim();
                       final pass = passwordController.text.trim();
-                      controller.signIn(email, pass, context);
+                      final result = await controller.signIn(email, pass, context);
+
+                      if (result['success']) {
+                        // Navigate to home screen
+                        Get.offAllNamed('/home');
+                      } else if (result['needsVerification']) {
+                        // Navigate to OTP verification screen
+                        Get.to(
+                          () => OtpVerificationScreen(
+                            email: result['email'],
+                            name: 'User', // You might want to get this from user profile
+                          ),
+                        );
+                      }
                     },
               child: controller.loading ? const CircularProgressIndicator() : const Text("Login"),
             ),
             TextButton(
               onPressed: () {
-                Navigator.pushReplacementNamed(context, '/signup');
+                Get.to(() => SignupScreen());
               },
               child: const Text("Create an account"),
             ),
