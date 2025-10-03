@@ -4,6 +4,8 @@ import 'package:chatus/modules/auth/login/screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../base/view.dart';
+
 class SplashController extends ChangeNotifier {
   bool _loading = false;
   bool get loading => _loading;
@@ -21,7 +23,7 @@ class SplashController extends ChangeNotifier {
 
       if (isLoggedIn) {
         // User is logged in, navigate to home screen
-        Get.offAll(() => const HomeScreen());
+        Get.offAll(() => const BaseScreen());
       } else {
         // User is not logged in, navigate to login screen
         Get.offAll(() => LoginScreen());

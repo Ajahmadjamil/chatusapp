@@ -1,6 +1,8 @@
 import 'package:chatus/core/constants/app_constants.dart';
+import 'package:chatus/core/theme/theme_service.dart';
 import 'package:chatus/modules/auth/login/screen.dart';
 import 'package:chatus/modules/auth/signup/screen.dart';
+import 'package:chatus/modules/base/view.dart';
 import 'package:chatus/modules/home/screen.dart';
 import 'package:chatus/modules/splash/view.dart';
 import 'package:cloudinary_flutter/cloudinary_context.dart';
@@ -33,21 +35,29 @@ class MyApp extends StatelessWidget {
 
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (context) => ThemeService()),
         ChangeNotifierProvider(create: (context) => SplashController()),
         ChangeNotifierProvider(create: (context) => SignUpController()),
         ChangeNotifierProvider(create: (context) => LoginController()),
         ChangeNotifierProvider(create: (context) => OtpVerificationController()),
       ],
-      child: GetMaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Chat Us App',
-        theme: ThemeData(primarySwatch: Colors.deepPurple),
-        home: SplashScreen(),
-        getPages: [
-          GetPage(name: '/signup', page: () => SignupScreen()),
-          GetPage(name: '/login', page: () => LoginScreen()),
-          GetPage(name: '/home', page: () => const HomeScreen()),
-        ],
+      child: Consumer<ThemeService>(
+        builder: (context, themeService, _) {
+          return GetMaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'Chat Us App',
+            themeMode: themeService.themeMode,
+            theme: ThemeData(primarySwatch: Colors.deepPurple, brightness: Brightness.light),
+            darkTheme: ThemeData.dark(),
+            home: SplashScreen(),
+            getPages: [
+              GetPage(name: '/signup', page: () => SignupScreen()),
+              GetPage(name: '/login', page: () => LoginScreen()),
+              GetPage(name: '/home', page: () => const HomeScreen()),
+              GetPage(name: '/base', page: () => const BaseScreen()),
+            ],
+          );
+        },
       ),
     );
   }
