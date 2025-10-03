@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
+import 'package:chatus/core/local/shared_pref.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -30,31 +31,20 @@ class HomeController extends GetxController {
 
   Future<void> uploadImage() async {
     if (imageFile == null) {
-      Get.snackbar(
-        "Error",
-        "No image selected.",
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      Get.snackbar("Error", "No image selected.", snackPosition: SnackPosition.BOTTOM);
       return;
     }
 
-    final request =
-        http.MultipartRequest('POST', _apiEndPoints.cloudinaryUploadUrl)
-          ..fields['upload_preset'] = 'upload_images'
-          ..files.add(
-            await http.MultipartFile.fromPath('file', imageFile!.path),
-          );
+    final request = http.MultipartRequest('POST', _apiEndPoints.cloudinaryUploadUrl)
+      ..fields['upload_preset'] = 'upload_images'
+      ..files.add(await http.MultipartFile.fromPath('file', imageFile!.path));
 
     try {
       final response = await request.send();
       final responseString = await response.stream.bytesToString();
 
       if (response.statusCode == 200) {
-        Get.snackbar(
-          "Success",
-          "Image Uploaded",
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        Get.snackbar("Success", "Image Uploaded", snackPosition: SnackPosition.BOTTOM);
         final jsonMap = jsonDecode(responseString);
         print("Upload Response: $jsonMap");
         final String? assetFolder = jsonMap['asset_folder'];
@@ -62,28 +52,17 @@ class HomeController extends GetxController {
           await fetchImagesFromCloudinaryFolder(assetFolder);
         }
       } else {
-        Get.snackbar(
-          "Upload Failed",
-          "Error: ${response.statusCode}",
-          snackPosition: SnackPosition.BOTTOM,
-        );
-        print(
-          "Error uploading image. Status: ${response.statusCode}, Body: $responseString",
-        );
+        Get.snackbar("Upload Failed", "Error: ${response.statusCode}", snackPosition: SnackPosition.BOTTOM);
+        print("Error uploading image. Status: ${response.statusCode}, Body: $responseString");
       }
     } catch (e) {
-      Get.snackbar(
-        "Upload Error",
-        "An exception occurred: $e",
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      Get.snackbar("Upload Error", "An exception occurred: $e", snackPosition: SnackPosition.BOTTOM);
       print("Exception during image upload: $e");
     }
   }
 
   Future<void> fetchImagesFromCloudinaryFolder(String folderName) async {
-    if (AppConstants.cloudinaryApiKey.isEmpty ||
-        AppConstants.cloudinaryApiSecret.isEmpty) {
+    if (AppConstants.cloudinaryApiKey.isEmpty || AppConstants.cloudinaryApiSecret.isEmpty) {
       Get.snackbar(
         "Config Error",
         "API Key/Secret not set.",
@@ -100,32 +79,20 @@ class HomeController extends GetxController {
     final res = await http.post(
       _apiEndPoints.cloudinarySearchUrl,
       headers: {"Authorization": auth, "Content-Type": "application/json"},
-      body: jsonEncode({
-        "expression": 'asset_folder:"$folderName"',
-        "max_results": 50,
-      }),
+      body: jsonEncode({"expression": 'asset_folder:"$folderName"', "max_results": 50}),
     );
 
     if (res.statusCode != 200) {
-      Get.snackbar(
-        "Fetch Error",
-        "Failed to fetch images: ${res.statusCode}",
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      Get.snackbar("Fetch Error", "Failed to fetch images: ${res.statusCode}", snackPosition: SnackPosition.BOTTOM);
       return;
     }
 
     final resources = (jsonDecode(res.body)["resources"] as List?) ?? [];
-    imageUrls.value = resources
-        .map((r) => r["secure_url"] ?? r["url"])
-        .whereType<String>()
-        .toList();
+    imageUrls.value = resources.map((r) => r["secure_url"] ?? r["url"]).whereType<String>().toList();
 
     Get.snackbar(
       imageUrls.isEmpty ? "Info" : "Success",
-      imageUrls.isEmpty
-          ? "No images found in '$folderName'."
-          : "${imageUrls.length} images loaded from '$folderName'.",
+      imageUrls.isEmpty ? "No images found in '$folderName'." : "${imageUrls.length} images loaded from '$folderName'.",
       snackPosition: SnackPosition.BOTTOM,
     );
   }
@@ -137,8 +104,11 @@ class HomeController extends GetxController {
         message: "Are you sure you want to log out?",
         onConfirm: () async {
           Get.back();
+          // Clear local authentication state
+          await SharedPref.clearUserData();
+          // Sign out from Supabase
           await Supabase.instance.client.auth.signOut();
-          Get.offAllNamed('/signup');
+          Get.offAllNamed('/login');
         },
         onCancel: () {
           Get.back();

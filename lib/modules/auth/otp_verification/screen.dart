@@ -1,4 +1,4 @@
-import 'package:chatus/modules/auth/otp_verification/provider.dart';
+import 'package:chatus/modules/auth/otp_verification/controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';

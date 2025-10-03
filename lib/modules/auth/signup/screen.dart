@@ -1,6 +1,6 @@
-import 'package:chatus/modules/auth/signup/provider.dart';
+import 'package:chatus/modules/auth/signup/controller.dart';
 import 'package:chatus/modules/auth/otp_verification/screen.dart';
-import 'package:chatus/modules/auth/otp_verification/provider.dart';
+import 'package:chatus/modules/auth/otp_verification/controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';

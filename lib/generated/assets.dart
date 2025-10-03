@@ -2,6 +2,7 @@
 class Assets {
   Assets._();
 
+  static const String imagesLogo = 'assets/images/applogo.png';
   static const String imagesMiniTotoros = 'assets/images/mini_totoros.png';
   static const String lottie404 = 'assets/lottie/404.json';
   static const String lottieLogOut = 'assets/lottie/log_out.json';

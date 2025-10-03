@@ -1,8 +1,8 @@
-import 'dart:async';
 import 'package:chatus/generated/assets.dart';
+import 'package:chatus/modules/splash/controller.dart';
 import 'package:lottie/lottie.dart';
 import 'package:flutter/material.dart';
-import 'package:chatus/modules/auth/signup/screen.dart';
+import 'package:provider/provider.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -15,10 +15,9 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 3), () {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (BuildContext context) => SignupScreen()),
-      );
+    // Check authentication status and navigate accordingly
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<SplashController>(context, listen: false).checkAuthAndNavigate();
     });
   }
 
@@ -29,7 +28,18 @@ class _SplashScreenState extends State<SplashScreen> {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [Lottie.asset(Assets.lottieSplash)],
+          children: [
+            Lottie.asset(Assets.lottieSplash),
+            const SizedBox(height: 20),
+            Consumer<SplashController>(
+              builder: (context, controller, child) {
+                if (controller.loading) {
+                  return const CircularProgressIndicator();
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+          ],
         ),
       ),
     );

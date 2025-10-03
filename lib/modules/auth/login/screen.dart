@@ -1,4 +1,4 @@
-import 'package:chatus/modules/auth/login/provider.dart';
+import 'package:chatus/modules/auth/login/controller.dart';
 import 'package:chatus/modules/auth/signup/screen.dart';
 import 'package:chatus/modules/auth/otp_verification/screen.dart';
 import 'package:flutter/material.dart';
