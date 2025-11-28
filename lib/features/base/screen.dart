@@ -1,12 +1,10 @@
-import 'package:chatus/modules/base/widgets/bottom_bar_items.dart';
-import 'package:chatus/modules/settings/screen.dart';
-import 'package:chatus/modules/status/screen.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
-
-import '../../core/theme/app_colors.dart';
-import '../home/screen.dart';
-import 'controller.dart';
+import 'package:provider/provider.dart';
+import 'package:chatus/features/home/screen.dart';
+import 'package:chatus/core/theme/app_colors.dart';
+import 'package:chatus/features/status/screen.dart';
+import 'package:chatus/features/profile/screen.dart';
+import 'package:chatus/features/base/controller.dart';
 
 class BaseScreen extends StatelessWidget {
   const BaseScreen({super.key});
@@ -28,14 +26,15 @@ class BaseScreen extends StatelessWidget {
                   case 1:
                     return const StatusScreen();
                   case 2:
-                    return const SettingsScreen();
+                    return const ProfileScreen();
                   default:
                     return Container();
                 }
               },
             ),
             bottomNavigationBar: Consumer<BaseController>(
-              builder: (context, provider, child) => _buildBottomNavBar(context, provider),
+              builder: (context, provider, child) =>
+                  _buildBottomNavBar(context, provider),
             ),
           );
         },
@@ -43,7 +42,10 @@ class BaseScreen extends StatelessWidget {
     );
   }
 
-  BottomAppBar _buildBottomNavBar(BuildContext context, BaseController provider) {
+  BottomAppBar _buildBottomNavBar(
+    BuildContext context,
+    BaseController provider,
+  ) {
     return BottomAppBar(
       elevation: 0,
       color: Colors.transparent,
@@ -55,31 +57,59 @@ class BaseScreen extends StatelessWidget {
           gradient: AppColors.navbarBg,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: Colors.black.withOpacity(.3), width: 1),
-          boxShadow: [BoxShadow(color: AppColors.navBarShadowColor, blurRadius: 4, offset: const Offset(0, 4))],
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.navBarShadowColor,
+              blurRadius: 4,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _buildNavButton(icon: Icons.chat, isSelected: provider.index == 0, onTap: () => provider.setIndex(0)),
-            _buildNavButton(icon: Icons.camera_alt, isSelected: provider.index == 1, onTap: () => provider.setIndex(1)),
+            _buildNavButton(
+              icon: Icons.chat,
+              isSelected: provider.index == 0,
+              onTap: () => provider.setIndex(0),
+            ),
+            _buildNavButton(
+              icon: Icons.camera_alt,
+              isSelected: provider.index == 1,
+              onTap: () => provider.setIndex(1),
+            ),
 
-            _buildNavButton(icon: Icons.settings, isSelected: provider.index == 2, onTap: () => provider.setIndex(2)),
+            _buildNavButton(
+              icon: Icons.settings,
+              isSelected: provider.index == 2,
+              onTap: () => provider.setIndex(2),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildNavButton({required IconData icon, required bool isSelected, required VoidCallback onTap}) {
+  Widget _buildNavButton({
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: isSelected ? Colors.black.withOpacity(0.8) : Colors.transparent,
+          color: isSelected
+              ? Colors.black.withOpacity(0.8)
+              : Colors.transparent,
         ),
-        child: Icon(icon, color: isSelected ? Colors.red : Colors.white, size: 24),
+        child: Icon(
+          icon,
+          color: isSelected ? Colors.red : Colors.white,
+          size: 24,
+        ),
       ),
     );
   }

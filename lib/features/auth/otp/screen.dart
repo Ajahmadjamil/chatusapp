@@ -1,8 +1,8 @@
-import 'package:chatus/modules/auth/otp_verification/controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import 'package:chatus/features/base/screen.dart';
+import 'package:chatus/features/auth/otp/controller.dart';
 
 class OtpVerificationScreen extends StatelessWidget {
   final String email;
@@ -10,13 +10,16 @@ class OtpVerificationScreen extends StatelessWidget {
 
   OtpVerificationScreen({super.key, required this.email, required this.name});
 
-  final List<TextEditingController> otpControllers = List.generate(6, (index) => TextEditingController());
+  final List<TextEditingController> otpControllers = List.generate(
+    6,
+    (index) => TextEditingController(),
+  );
 
   final List<FocusNode> focusNodes = List.generate(6, (index) => FocusNode());
 
   @override
   Widget build(BuildContext context) {
-    final controller = Provider.of<OtpVerificationController>(context);
+    final controller = Provider.of<OtpController>(context);
 
     return Scaffold(
       appBar: AppBar(title: const Text("Email Verification")),
@@ -34,9 +37,10 @@ class OtpVerificationScreen extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               email,
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).primaryColor,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 40),
@@ -55,7 +59,9 @@ class OtpVerificationScreen extends StatelessWidget {
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: InputDecoration(
                       counterText: '',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                     style: Theme.of(context).textTheme.headlineSmall,
                     onChanged: (value) {
@@ -74,23 +80,36 @@ class OtpVerificationScreen extends StatelessWidget {
               onPressed: controller.loading
                   ? null
                   : () async {
-                      final otp = otpControllers.map((controller) => controller.text).join();
+                      final otp = otpControllers
+                          .map((controller) => controller.text)
+                          .join();
 
                       if (otp.length != 6) {
-                        ScaffoldMessenger.of(
-                          context,
-                        ).showSnackBar(const SnackBar(content: Text("Please enter a 6-digit OTP")));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Please enter a 6-digit OTP"),
+                          ),
+                        );
                         return;
                       }
 
-                      final success = await controller.verifyOtp(email: email, otp: otp, name: name, context: context);
+                      final success = await controller.verifyOtp(
+                        email: email,
+                        otp: otp,
+                        name: name,
+                        context: context,
+                      );
 
                       if (success) {
-                        // Navigate to home or login screen
-                        Get.offAllNamed('/home'); // Assuming you have a home route
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (context) => BaseScreen()),
+                          (route) => false,
+                        );
                       }
                     },
-              child: controller.loading ? const CircularProgressIndicator() : const Text("Verify OTP"),
+              child: controller.loading
+                  ? const CircularProgressIndicator()
+                  : const Text("Verify OTP"),
             ),
             const SizedBox(height: 20),
             TextButton(
@@ -99,7 +118,9 @@ class OtpVerificationScreen extends StatelessWidget {
                   : () {
                       controller.sendOtp(email, context);
                     },
-              child: controller.resendLoading ? const CircularProgressIndicator() : const Text("Resend OTP"),
+              child: controller.resendLoading
+                  ? const CircularProgressIndicator()
+                  : const Text("Resend OTP"),
             ),
           ],
         ),

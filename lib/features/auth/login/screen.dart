@@ -1,9 +1,9 @@
-import 'package:chatus/modules/auth/login/controller.dart';
-import 'package:chatus/modules/auth/signup/screen.dart';
-import 'package:chatus/modules/auth/otp_verification/screen.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import 'package:chatus/features/base/screen.dart';
+import 'package:chatus/features/auth/otp/screen.dart';
+import 'package:chatus/features/auth/signup/screen.dart';
+import 'package:chatus/features/auth/login/controller.dart';
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
@@ -38,26 +38,37 @@ class LoginScreen extends StatelessWidget {
                   : () async {
                       final email = emailController.text.trim();
                       final pass = passwordController.text.trim();
-                      final result = await controller.signIn(email, pass, context);
+                      final result = await controller.signIn(
+                        email,
+                        pass,
+                        context,
+                      );
 
                       if (result['success']) {
-                        // Navigate to home screen
-                        Get.offAllNamed('/home');
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (context) => BaseScreen()),
+                          (route) => false,
+                        );
                       } else if (result['needsVerification']) {
-                        // Navigate to OTP verification screen
-                        Get.to(
-                          () => OtpVerificationScreen(
-                            email: result['email'],
-                            name: 'User', // You might want to get this from user profile
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => OtpVerificationScreen(
+                              email: result['email'],
+                              name: 'User',
+                            ),
                           ),
                         );
                       }
                     },
-              child: controller.loading ? const CircularProgressIndicator() : const Text("Login"),
+              child: controller.loading
+                  ? const CircularProgressIndicator()
+                  : const Text("Login"),
             ),
             TextButton(
               onPressed: () {
-                Get.to(() => SignupScreen());
+                Navigator.of(
+                  context,
+                ).push(MaterialPageRoute(builder: (context) => SignupScreen()));
               },
               child: const Text("Create an account"),
             ),

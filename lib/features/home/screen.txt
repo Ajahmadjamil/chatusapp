@@ -1,0 +1,141 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:chatus/core/theme/app_colors.dart';
+import 'package:chatus/features/home/controller.dart';
+
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<HomeController>().fetchImagesFromCloudinaryFolder(
+          context,
+          "ChatUs",
+        );
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = context.watch<HomeController>();
+
+    return Scaffold(
+      appBar: AppBar(backgroundColor: Colors.white, title: const Text("Home")),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Container(
+            decoration: BoxDecoration(gradient: AppColors.appBgGradient),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.photo_library),
+                  onPressed: () async {
+                    await controller.pickImage(ImageSource.gallery);
+                    if (controller.imageFile != null && context.mounted) {
+                      await controller.uploadImage(context);
+                    }
+                  },
+                  label: const Text('Pick & Upload Image to Cloudinary'),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.folder_open),
+                  onPressed: () {
+                    controller.fetchImagesFromCloudinaryFolder(
+                      context,
+                      "ChatUs",
+                    );
+                  },
+                  label: const Text('Load Images from "ChatUs" Folder'),
+                ),
+                const SizedBox(height: 20),
+                if (controller.imageUrls.isEmpty) ...[
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Text(
+                        'No images to display.\nUpload an image or load the "ChatUs" folder.',
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ] else ...[
+                  Expanded(
+                    child: GridView.builder(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 8.0,
+                            mainAxisSpacing: 8.0,
+                          ),
+                      itemCount: controller.imageUrls.length,
+                      itemBuilder: (context, index) {
+                        return Card(
+                          clipBehavior: Clip.antiAlias,
+                          child: Image.network(
+                            controller.imageUrls[index],
+                            fit: BoxFit.cover,
+                            loadingBuilder:
+                                (
+                                  BuildContext context,
+                                  Widget child,
+                                  ImageChunkEvent? loadingProgress,
+                                ) {
+                                  if (loadingProgress == null) return child;
+                                  return Center(
+                                    child: CircularProgressIndicator(
+                                      value:
+                                          loadingProgress.expectedTotalBytes !=
+                                              null
+                                          ? loadingProgress
+                                                    .cumulativeBytesLoaded /
+                                                loadingProgress
+                                                    .expectedTotalBytes!
+                                          : null,
+                                    ),
+                                  );
+                                },
+                            errorBuilder:
+                                (
+                                  BuildContext context,
+                                  Object error,
+                                  StackTrace? stackTrace,
+                                ) {
+                                  return Container(
+                                    color: Colors.grey[200],
+                                    child: const Center(
+                                      child: Icon(
+                                        Icons.broken_image,
+                                        color: Colors.grey,
+                                        size: 40,
+                                      ),
+                                    ),
+                                  );
+                                },
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

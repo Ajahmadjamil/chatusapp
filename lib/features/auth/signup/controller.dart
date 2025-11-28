@@ -1,4 +1,4 @@
-import 'package:chatus/modules/auth/signup/repository.dart';
+import 'package:chatus/features/auth/signup/repository.dart';
 import 'package:flutter/material.dart';
 
 class SignUpController extends ChangeNotifier {
@@ -7,19 +7,26 @@ class SignUpController extends ChangeNotifier {
   bool _loading = false;
   bool get loading => _loading;
 
-  Future<bool> signUp(String email, String password, BuildContext context) async {
+  Future<bool> signUp(
+    String email,
+    String password,
+    BuildContext context,
+  ) async {
     _loading = true;
     notifyListeners();
 
     try {
       await _repo.signUp(email: email, password: password);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Signup successful")));
-      // Navigator.pushReplacementNamed(context, '/login');
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Signup successful")));
       _loading = false;
       notifyListeners();
       return true;
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
       _loading = false;
       notifyListeners();
       return false;

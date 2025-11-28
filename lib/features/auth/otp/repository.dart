@@ -7,8 +7,15 @@ class OtpVerificationRepository {
     await _client.auth.resend(type: OtpType.signup, email: email);
   }
 
-  Future<AuthResponse> verifyOtp({required String email, required String otp}) async {
-    return await _client.auth.verifyOTP(email: email, token: otp, type: OtpType.signup);
+  Future<AuthResponse> verifyOtp({
+    required String email,
+    required String otp,
+  }) async {
+    return await _client.auth.verifyOTP(
+      email: email,
+      token: otp,
+      type: OtpType.signup,
+    );
   }
 
   Future<bool> isEmailVerified() async {
@@ -16,9 +23,12 @@ class OtpVerificationRepository {
     return user?.emailConfirmedAt != null;
   }
 
-  Future<void> createUserProfile({required String userId, required String name, required String email}) async {
+  Future<void> createUserProfile({
+    required String userId,
+    required String name,
+    required String email,
+  }) async {
     await _client.from('profiles').insert({
-      // If you've set id default to auth.uid() in DB, remove this line:
       'id': userId,
 
       'name': name,

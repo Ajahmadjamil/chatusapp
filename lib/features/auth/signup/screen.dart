@@ -1,11 +1,9 @@
-import 'package:chatus/modules/auth/signup/controller.dart';
-import 'package:chatus/modules/auth/otp_verification/screen.dart';
-import 'package:chatus/modules/auth/otp_verification/controller.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:provider/provider.dart';
-
-import '../login/screen.dart';
+import 'package:chatus/features/auth/otp/screen.dart';
+import 'package:chatus/features/auth/login/screen.dart';
+import 'package:chatus/features/auth/otp/controller.dart';
+import 'package:chatus/features/auth/signup/controller.dart';
 
 class SignupScreen extends StatelessWidget {
   SignupScreen({super.key});
@@ -17,7 +15,7 @@ class SignupScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<SignUpController>(context);
-    final otpController = Provider.of<OtpVerificationController>(context);
+    final otpController = Provider.of<OtpController>(context);
 
     return Scaffold(
       appBar: AppBar(title: const Text("Sign Up")),
@@ -51,25 +49,38 @@ class SignupScreen extends StatelessWidget {
                       final pass = passwordController.text.trim();
 
                       if (name.isEmpty) {
-                        ScaffoldMessenger.of(
-                          context,
-                        ).showSnackBar(const SnackBar(content: Text("Please enter your name")));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Please enter your name"),
+                          ),
+                        );
                         return;
                       }
 
-                      final success = await controller.signUp(email, pass, context);
+                      final success = await controller.signUp(
+                        email,
+                        pass,
+                        context,
+                      );
                       if (success) {
-                        // After signup, send OTP for verification
                         await otpController.sendOtp(email, context);
-
-                        Get.to(() => OtpVerificationScreen(email: email, name: name));
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                OtpVerificationScreen(email: email, name: name),
+                          ),
+                        );
                       }
                     },
-              child: controller.loading ? const CircularProgressIndicator() : const Text("Sign Up"),
+              child: controller.loading
+                  ? const CircularProgressIndicator()
+                  : const Text("Sign Up"),
             ),
             TextButton(
               onPressed: () {
-                Get.to(() => LoginScreen());
+                Navigator.of(
+                  context,
+                ).push(MaterialPageRoute(builder: (context) => LoginScreen()));
               },
               child: const Text("Already have an account? Login"),
             ),

@@ -1,5 +1,5 @@
 import 'package:chatus/generated/assets.dart';
-import 'package:chatus/modules/splash/controller.dart';
+import 'package:chatus/features/splash/controller.dart';
 import 'package:lottie/lottie.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -15,9 +15,11 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // Check authentication status and navigate accordingly
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<SplashController>(context, listen: false).checkAuthAndNavigate();
+      Provider.of<SplashController>(
+        context,
+        listen: false,
+      ).checkAuthAndNavigate(context);
     });
   }
 

@@ -1,10 +1,9 @@
-import 'package:chatus/modules/auth/otp_verification/repository.dart';
-import 'package:chatus/modules/home/screen.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter/foundation.dart';
+import 'package:chatus/features/home/screen.dart';
+import 'package:chatus/features/auth/otp/repository.dart';
 
-class OtpVerificationController extends ChangeNotifier {
+class OtpController extends ChangeNotifier {
   final _repo = OtpVerificationRepository();
 
   bool _loading = false;
@@ -21,12 +20,16 @@ class OtpVerificationController extends ChangeNotifier {
 
     try {
       await _repo.sendOtp(email: email);
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("OTP sent to your email")));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("OTP sent to your email")));
     } catch (e) {
       if (kDebugMode) {
         print(e);
       }
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     }
 
     _resendLoading = false;
@@ -46,11 +49,18 @@ class OtpVerificationController extends ChangeNotifier {
       final response = await _repo.verifyOtp(email: email, otp: otp);
 
       if (response.user != null) {
-        // Create user profile in Supabase
-        await _repo.createUserProfile(userId: response.user!.id, name: name, email: email);
-        Get.to(() => HomeScreen());
+        await _repo.createUserProfile(
+          userId: response.user!.id,
+          name: name,
+          email: email,
+        );
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (context) => HomeScreen()));
 
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Email verified successfully")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Email verified successfully")),
+        );
 
         _loading = false;
         notifyListeners();
@@ -60,7 +70,9 @@ class OtpVerificationController extends ChangeNotifier {
       if (kDebugMode) {
         print(e);
       }
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     }
 
     _loading = false;

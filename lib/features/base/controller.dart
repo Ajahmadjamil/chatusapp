@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:chatus/modules/base/repository.dart';
+import 'package:chatus/features/base/repository.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -12,7 +12,9 @@ class BaseController extends ChangeNotifier {
   List<String> list = [];
   bool isDeviceConnected = false;
   bool isAlertSet = false;
-  late StreamSubscription subscription;
+
+  StreamSubscription? subscription;
+
   int _index = 0;
 
   int get index => _index;
@@ -35,7 +37,7 @@ class BaseController extends ChangeNotifier {
 
   @override
   void dispose() {
-    subscription.cancel();
+    subscription?.cancel();
     super.dispose();
   }
 
