@@ -6,6 +6,9 @@ class ApiEndPoints {
   );
 
   static const String cloudinarySearchApiAuthority = "api.cloudinary.com";
+  static const String cloudinarySearchApiAuthority1 = "api.cloudinary.com";
+  static const String cloudinarySearchApiAuthority2 = "api.cloudinary.com";
+  static const String cloudinarySearchApiAuthority3 = "api.cloudinary.com";
   static String get cloudinarySearchApiPath =>
       '/v1_1/${AppConstants.cloudinaryCloudName}/resources/search';
 
