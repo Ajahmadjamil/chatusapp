@@ -12,13 +12,12 @@ on:
     branches:
       - main
 
-jobs:g
+jobs:
   build:
     name: Build Flutter Apps
     runs-on: macos-latest
 
     steps:
-
       - name: Checkout Repository
         uses: actions/checkout@v3
 
@@ -60,7 +59,6 @@ jobs:g
             scope=drive \
             service_account_file=service-account.json
 
-      # Cleanup old builds per type (keep last 2)
       - name: Cleanup old builds on Drive
         run: |
           # Delete older debug APKs
