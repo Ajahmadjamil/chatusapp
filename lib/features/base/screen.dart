@@ -22,7 +22,7 @@ class BaseScreen extends StatelessWidget {
               builder: (context, provider, child) {
                 switch (provider.index) {
                   case 0:
-                    return const HomeScreen();
+                    return HomeScreen();
                   case 1:
                     return const StatusScreen();
                   case 2:
