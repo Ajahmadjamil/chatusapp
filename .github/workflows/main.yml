@@ -1,4 +1,4 @@
-name: Flutter CI Build & Upload
+name: Flutter Release Build & Upload
 
 on:
   push:
@@ -14,74 +14,57 @@ on:
 
 jobs:
   build:
-    name: Build Flutter Apps
+    name: Build Flutter Release APK
     runs-on: macos-latest
 
     steps:
+      # 1. Checkout code
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      # 2. Setup Java (required for Flutter Android build)
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
           distribution: zulu
           java-version: 17
 
+      # 3. Setup Flutter
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
 
-      - name: Install Dependencies
+      # 4. Install dependencies
+      - name: Install dependencies
         run: flutter pub get
 
-      - name: Build Debug APK
-        run: flutter build apk --debug
-
-      - name: Build Release APK
+      # 5. Build Android release APKs (split per ABI)
+      - name: Build Android Release APKs
         run: flutter build apk --release --split-per-abi
 
-      - name: Build iOS IPA
-        run: |
-          flutter build ios --release --no-codesign
-          cd build/ios/iphoneos
-          mkdir -p Payload
-          cp -r Runner.app Payload
-          zip -r app.ipa Payload
-
+      # 6. Install rclone
       - name: Install rclone
         run: brew install rclone
 
-      - name: Configure Google Drive
+      # 7. Configure rclone with personal Gmail OAuth
+      - name: Configure rclone
         run: |
-          echo '${{ secrets.GDRIVE_SERVICE_ACCOUNT }}' > service-account.json
-          rclone config create gdrive drive \
-            scope=drive \
-            service_account_file=service-account.json
+          mkdir -p ~/.config/rclone
+          echo '${{ secrets.RCLONE_CONFIG_CONTENT }}' > ~/.config/rclone/rclone.conf
 
-      - name: Cleanup old builds on Drive
+      # 8. Upload release APKs to Google Drive
+      - name: Upload release APKs to Google Drive
         run: |
-          # Delete older debug APKs
-          rclone lsf gdrive:builds | grep 'appname_debug.apk' | sort | head -n -2 | xargs -I{} rclone delete gdrive:builds/{}
-          # Delete older release APKs
-          rclone lsf gdrive:builds | grep 'appname_release' | sort | head -n -2 | xargs -I{} rclone delete gdrive:builds/{}
-          # Delete older iOS builds
-          rclone lsf gdrive:builds | grep 'appname_ios.ipa' | sort | head -n -2 | xargs -I{} rclone delete gdrive:builds/{}
+          rclone copy build/app/outputs/apk/release/app-armeabi-v7a-release.apk gdrive:builds/app_release_armeabi-v7a.apk
+          rclone copy build/app/outputs/apk/release/app-arm64-v8a-release.apk gdrive:builds/app_release_arm64-v8a.apk
+          rclone copy build/app/outputs/apk/release/app-x86_64-release.apk gdrive:builds/app_release_x86_64.apk
 
-      - name: Upload APKs and IPA to Google Drive
-        run: |
-          rclone copy build/app/outputs/flutter-apk/app-debug.apk gdrive:builds/appname_debug.apk
-          rclone copy build/app/outputs/apk/release/app-armeabi-v7a-release.apk gdrive:builds/appname_release_armeabi-v7a.apk
-          rclone copy build/app/outputs/apk/release/app-arm64-v8a-release.apk gdrive:builds/appname_release_arm64.apk
-          rclone copy build/app/outputs/apk/release/app-x86_64-release.apk gdrive:builds/appname_release_x86_64.apk
-          rclone copy build/ios/iphoneos/app.ipa gdrive:builds/appname_ios.ipa
-
+      # 9. Upload release APKs to GitHub Release
       - name: Upload to GitHub Release
         uses: ncipollo/release-action@v1
         with:
           artifacts: |
-            build/app/outputs/flutter-apk/app-debug.apk
             build/app/outputs/apk/release/*
-            build/ios/iphoneos/app.ipa
           tag: v1.0.${{ github.run_number }}
           token: ${{ secrets.TOKEN }}
